@@ -10,10 +10,8 @@ def render_map(df, metric, radius, blur, key_suffix):
         st.error("Nenhum dado encontrado para a seleção.")
         return df
 
-    # Create the base map
     m = folium.Map(location=[df["latitude"].mean(), df["longitude"].mean()], zoom_start=18, tiles='OpenStreetMap')
     
-    # Add HeatMap
     dados_heat = df[["latitude", "longitude", "peso_norm"]].values.tolist()
     HeatMap(
         dados_heat,
@@ -23,13 +21,11 @@ def render_map(df, metric, radius, blur, key_suffix):
         gradient=GRADIENT_HEATMAP,
     ).add_to(m)
 
-    # Calculate Legend values
     min_val = df[metric].min()
     max_val = df[metric].max()
     is_latency = metric in LATENCY_METRICS
     legend_colors = "linear-gradient(to right, red, yellow, lime, cyan, blue)" if is_latency else "linear-gradient(to right, blue, cyan, lime, yellow, red)"
 
-    # Build an absolute positioned HTML block for inside the Folium map
     legend_html = f"""
         <div style="
             position: absolute; 
@@ -53,8 +49,6 @@ def render_map(df, metric, radius, blur, key_suffix):
         </div>
     """
     
-    # Inject the HTML directly into the Folium map element
     m.get_root().html.add_child(folium.Element(legend_html))
 
-    # Render map
     st_folium(m, use_container_width=True, height=500, key=f"mapa_{key_suffix}")
